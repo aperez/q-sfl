@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Node {
     public static enum Type {
-        PACKAGE("."), CLASS("$"), METHOD("#"), LINE(":");
+        PACKAGE("."), CLASS("$"), METHOD("#"), LINE(":"), PARAMETER("/"), LANDMARK("^");
 
         private final String symbol;
 

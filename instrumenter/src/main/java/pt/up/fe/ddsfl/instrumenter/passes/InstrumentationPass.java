@@ -32,14 +32,14 @@ public class InstrumentationPass implements Pass {
     @Override
     public Outcome transform(CtClass c) throws Exception {
 
-        for (CtBehavior b : c.getDeclaredBehaviors()) {
-            handleBehavior(c, b);
-        }
-
         // make field
         CtField f = CtField.make("private static boolean[] " + HIT_VECTOR_NAME + ";", c);
         f.setModifiers(f.getModifiers() | AccessFlag.SYNTHETIC);
         c.addField(f);
+
+        for (CtBehavior b : c.getDeclaredBehaviors()) {
+            handleBehavior(c, b);
+        }
 
         // make class initializer
         CtConstructor initializer = c.makeClassInitializer();
@@ -53,11 +53,12 @@ public class InstrumentationPass implements Pass {
         MethodInfo info = b.getMethodInfo();
         CodeAttribute ca = info.getCodeAttribute();
 
+        // skip synthetic methods
+        if ((b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
+            return;
+        }
+
         if (ca != null) {
-            // skip synthetic methods
-            if ((b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
-                return;
-            }
 
             CodeIterator ci = ca.iterator();
 

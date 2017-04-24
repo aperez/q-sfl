@@ -5,6 +5,7 @@ import javassist.CtClass;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.MethodInfo;
 import pt.up.fe.ddsfl.common.model.Node;
+import pt.up.fe.ddsfl.instrumenter.model.NodeRetriever;
 
 public class MethodGranularity extends AbstractGranularity {
 
@@ -24,6 +25,6 @@ public class MethodGranularity extends AbstractGranularity {
 
     @Override
     public Node getNode(CtClass cls, CtBehavior m, int line) {
-        return super.getMethodNode(cls, m, line);
+        return NodeRetriever.getMethodNode(cls, m, line);
     }
 }

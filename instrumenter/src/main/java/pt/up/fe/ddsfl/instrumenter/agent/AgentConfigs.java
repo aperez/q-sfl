@@ -21,6 +21,7 @@ import pt.up.fe.ddsfl.instrumenter.matchers.OrMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.PrefixMatcher;
 import pt.up.fe.ddsfl.instrumenter.passes.FilterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.InstrumentationPass;
+import pt.up.fe.ddsfl.instrumenter.passes.LandmarkInserterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.Pass;
 import pt.up.fe.ddsfl.instrumenter.passes.StackSizePass;
 import pt.up.fe.ddsfl.instrumenter.passes.TestFilterPass;
@@ -90,6 +91,7 @@ public class AgentConfigs {
         instrumentationPasses.add(fp);
         instrumentationPasses.add(new TestFilterPass());
         instrumentationPasses.add(new InstrumentationPass(granularityLevel));
+        instrumentationPasses.add(new LandmarkInserterPass());
         instrumentationPasses.add(new StackSizePass());
 
         return instrumentationPasses;

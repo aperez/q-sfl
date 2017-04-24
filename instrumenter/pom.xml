@@ -33,6 +33,11 @@
             <artifactId>ddsfl-common</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>pt.up.fe.ddsfl</groupId>
+            <artifactId>ddsfl-annotations</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

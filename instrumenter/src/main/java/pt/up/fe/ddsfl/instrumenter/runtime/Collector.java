@@ -1,5 +1,8 @@
 package pt.up.fe.ddsfl.instrumenter.runtime;
 
+import java.util.List;
+
+import pt.up.fe.ddsfl.annotations.handlers.LandmarkHandler;
 import pt.up.fe.ddsfl.common.events.EventListener;
 import pt.up.fe.ddsfl.common.events.MultiEventListener;
 import pt.up.fe.ddsfl.common.model.Node;
@@ -15,6 +18,7 @@ public class Collector {
     private Tree tree;
     private HitVector hitVector;
     private SpectrumBuilder builder;
+    private LandmarkVector landmarkVector;
 
     public static Collector instance() {
         return collector;
@@ -34,6 +38,7 @@ public class Collector {
 
         this.tree = new Tree();
         this.hitVector = new HitVector();
+        this.landmarkVector = new LandmarkVector();
     }
 
     public void addListener(EventListener listener) {
@@ -81,6 +86,14 @@ public class Collector {
 
     public Node getRootNode() {
         return tree.getRoot();
+    }
+
+    public synchronized LandmarkHandler[] getLandmarkVector(String className) {
+        return landmarkVector.getLandmarkVector(className);
+    }
+
+    public synchronized void addLandmarkVector(String className, List<LandmarkHandler> landmarks) {
+        landmarkVector.addLandmarkVector(className, landmarks);
     }
 
 }
