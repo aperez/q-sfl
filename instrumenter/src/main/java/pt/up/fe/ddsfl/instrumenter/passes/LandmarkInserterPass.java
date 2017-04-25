@@ -1,5 +1,6 @@
 package pt.up.fe.ddsfl.instrumenter.passes;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,12 +10,15 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.Modifier;
+import javassist.NotFoundException;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
+import pt.up.fe.ddsfl.annotations.LandmarkAnnotation;
+import pt.up.fe.ddsfl.annotations.dispatchers.DefaultDispatcher;
+import pt.up.fe.ddsfl.annotations.dispatchers.Dispatcher;
 import pt.up.fe.ddsfl.annotations.handlers.LandmarkHandler;
-import pt.up.fe.ddsfl.annotations.handlers.ObjectHandler;
 import pt.up.fe.ddsfl.common.model.Node;
 import pt.up.fe.ddsfl.common.model.Node.Type;
 import pt.up.fe.ddsfl.instrumenter.model.NodeRetriever;
@@ -25,9 +29,16 @@ public class LandmarkInserterPass implements Pass {
 
     public static final String LANDMARK_VECTOR_NAME = "$__DDSFL_LANDMARK_VECTOR__";
 
+    private Dispatcher dispatcher = new DefaultDispatcher();
+
     @Override
     public Outcome transform(CtClass c) throws Exception {
-        //check if class contains instrumentation field
+        try {
+            //check if class contains instrumentation field
+            c.getDeclaredField(InstrumentationPass.HIT_VECTOR_NAME);
+        } catch (Exception e) {
+            return Outcome.CONTINUE;
+        }
 
         List<LandmarkHandler> handlers = new ArrayList<LandmarkHandler>();
 
@@ -52,7 +63,6 @@ public class LandmarkInserterPass implements Pass {
         MethodInfo info = b.getMethodInfo();
         CodeAttribute ca = info.getCodeAttribute();
 
-        // skip synthetic methods
         if ((b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
             return;
         }
@@ -70,6 +80,7 @@ public class LandmarkInserterPass implements Pass {
 
         LocalVariableAttribute attr = (LocalVariableAttribute) ca.getAttribute(LocalVariableAttribute.tag);
         CtClass[] params = b.getParameterTypes();
+        Object[][] paramsAnnotations = b.getAvailableParameterAnnotations();
         int pos = Modifier.isStatic(b.getModifiers()) ? 0 : 1;
 
         for (int i = 0; i < params.length; i++) {
@@ -77,7 +88,7 @@ public class LandmarkInserterPass implements Pass {
             String parameterName = attr.variableName(i + pos);
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
 
-            LandmarkHandler handler = getLandmarkHandler(b, i);
+            LandmarkHandler handler = getLandmarkHandler(params[i], paramsAnnotations[i]);
             if (handler == null || handler.landmarks() < 2) {
                 continue;
             }
@@ -109,8 +120,34 @@ public class LandmarkInserterPass implements Pass {
                 + landmark + "].handle(" + variable + ")" + "] = true; }");
     }
 
-    private LandmarkHandler getLandmarkHandler(CtBehavior b, int i) {
-        return new ObjectHandler();
+    private LandmarkHandler getLandmarkHandler(CtClass paramType, Object[] annotations) throws NotFoundException {
+        LandmarkHandler handler = processAnnotations(annotations);
+        if (handler != null) {
+            return handler;
+        }
+        return dispatcher.getHandler(paramType.getName());
     }
 
+    private LandmarkHandler processAnnotations(Object[] annotations) {
+        if (annotations == null) {
+            return null;
+        }
+
+        for (Object o : annotations) {
+            try {
+                Method m = o.getClass().getDeclaredMethod("type");
+                if(m.invoke(o) != LandmarkAnnotation.class) {
+                    continue;
+                }
+                m = o.getClass().getDeclaredMethod("handler");
+                Object ret = m.invoke(o);
+                if (ret instanceof Class<?>) {
+                    LandmarkHandler handler = (LandmarkHandler)((Class<?>)ret).newInstance();
+                    return handler;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return null;
+    }
 }
