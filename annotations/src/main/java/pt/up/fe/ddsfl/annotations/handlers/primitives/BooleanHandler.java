@@ -23,7 +23,7 @@ public class BooleanHandler implements LandmarkHandler {
         }
         return "true";
     }
-    
+
     public static class BoxedHandler extends NullableObjectHandler {
         public BoxedHandler() {
             super(new BooleanHandler());

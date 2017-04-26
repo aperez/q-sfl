@@ -6,9 +6,9 @@ import pt.up.fe.ddsfl.annotations.handlers.NumericHandler;
 public class ShortHandler extends NumericHandler {
 
     @Override
-    public int handle(Object o) {
-        Short value = (Short)o;
-        return value.compareTo(Short.valueOf((short)0));
+    protected int compareWithZero(Object o) {
+        Short value = (Short) o;
+        return value.compareTo(Short.valueOf((short) 0));
     }
 
     public static class BoxedHandler extends NullableObjectHandler {

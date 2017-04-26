@@ -6,8 +6,8 @@ import pt.up.fe.ddsfl.annotations.handlers.NumericHandler;
 public class LongHandler extends NumericHandler {
 
     @Override
-    public int handle(Object o) {
-        Long value = (Long)o;
+    protected int compareWithZero(Object o) {
+        Long value = (Long) o;
         return value.compareTo(Long.valueOf(0));
     }
 

@@ -3,6 +3,13 @@ package pt.up.fe.ddsfl.annotations.handlers;
 public abstract class NumericHandler implements LandmarkHandler {
 
     @Override
+    public int handle(Object o) {
+        return 1 + compareWithZero(o);
+    }
+
+    protected abstract int compareWithZero(Object o);
+
+    @Override
     public int landmarks() {
         return 3;
     }
@@ -11,8 +18,7 @@ public abstract class NumericHandler implements LandmarkHandler {
     public String getLandmarkName(int l) {
         if (l == 0) {
             return "<0";
-        }
-        else if (l == 1) {
+        } else if (l == 1) {
             return "=0";
         }
         return ">0";

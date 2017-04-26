@@ -16,6 +16,7 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 import pt.up.fe.ddsfl.annotations.LandmarkAnnotation;
+import pt.up.fe.ddsfl.annotations.LandmarkWith;
 import pt.up.fe.ddsfl.annotations.dispatchers.DefaultDispatcher;
 import pt.up.fe.ddsfl.annotations.dispatchers.Dispatcher;
 import pt.up.fe.ddsfl.annotations.handlers.LandmarkHandler;
@@ -29,7 +30,8 @@ public class LandmarkInserterPass implements Pass {
 
     public static final String LANDMARK_VECTOR_NAME = "$__DDSFL_LANDMARK_VECTOR__";
 
-    private Dispatcher dispatcher = new DefaultDispatcher();
+    private Dispatcher dispatcher;
+    private Dispatcher defaultDispatcher = new DefaultDispatcher();
 
     @Override
     public Outcome transform(CtClass c) throws Exception {
@@ -40,23 +42,43 @@ public class LandmarkInserterPass implements Pass {
             return Outcome.CONTINUE;
         }
 
-        List<LandmarkHandler> handlers = new ArrayList<LandmarkHandler>();
+        dispatcher = getLandmarkDispatcher(c);
+        if (dispatcher == null) {
+            return Outcome.CONTINUE;
+        }
 
         CtField f = CtField.make(
                 "private static " + LandmarkHandler.class.getCanonicalName() + "[] " + LANDMARK_VECTOR_NAME + ";", c);
         f.setModifiers(f.getModifiers() | AccessFlag.SYNTHETIC);
         c.addField(f);
 
+        CtConstructor initializer = c.makeClassInitializer();
+        initializer.insertBefore(LANDMARK_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
+                + ".instance().getLandmarkVector(\"" + c.getName() + "\");");
+
+        List<LandmarkHandler> handlers = new ArrayList<LandmarkHandler>();
         for (CtBehavior b : c.getDeclaredBehaviors()) {
             handleBehavior(c, b, handlers);
         }
         Collector.instance().addLandmarkVector(c.getName(), handlers);
 
-        CtConstructor initializer = c.makeClassInitializer();
-        initializer.insertBefore(LANDMARK_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
-                + ".instance().getLandmarkVector(\"" + c.getName() + "\");");
-
         return Outcome.CONTINUE;
+    }
+
+    private Dispatcher getLandmarkDispatcher(CtClass c) {
+        Object[] annotations = c.getAvailableAnnotations();
+
+        for (Object o : annotations) {
+            if (o instanceof LandmarkWith) {
+                try {
+                    LandmarkWith lw = (LandmarkWith) o;
+                    return lw.value().newInstance();
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        return defaultDispatcher;
     }
 
     private void handleBehavior(CtClass c, CtBehavior b, List<LandmarkHandler> handlers) throws Exception {
@@ -88,7 +110,7 @@ public class LandmarkInserterPass implements Pass {
             String parameterName = attr.variableName(i + pos);
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
 
-            LandmarkHandler handler = getLandmarkHandler(params[i], paramsAnnotations[i]);
+            LandmarkHandler handler = getLandmarkHandler(params[i], paramsAnnotations[i], false);
             if (handler == null || handler.landmarks() < 2) {
                 continue;
             }
@@ -120,12 +142,14 @@ public class LandmarkInserterPass implements Pass {
                 + landmark + "].handle(" + variable + ")" + "] = true; }");
     }
 
-    private LandmarkHandler getLandmarkHandler(CtClass paramType, Object[] annotations) throws NotFoundException {
-        LandmarkHandler handler = processAnnotations(annotations);
-        if (handler != null) {
-            return handler;
+    private LandmarkHandler getLandmarkHandler(CtClass paramType, Object[] annotations, boolean isReturn) throws NotFoundException {
+        if (!dispatcher.overrideAnnotations()) {
+            LandmarkHandler handler = processAnnotations(annotations);
+            if (handler != null) {
+                return handler;
+            }
         }
-        return dispatcher.getHandler(paramType.getName());
+        return dispatcher.getHandler(paramType.getName(), isReturn);
     }
 
     private LandmarkHandler processAnnotations(Object[] annotations) {

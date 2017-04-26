@@ -3,11 +3,11 @@ package pt.up.fe.ddsfl.annotations.handlers;
 public class NullableObjectHandler implements LandmarkHandler {
     private LandmarkHandler delegate;
     private String nullStr = "IsNull";
-    
+
     public NullableObjectHandler(LandmarkHandler delegate) {
         this.delegate = delegate;
     }
-    
+
     public NullableObjectHandler(LandmarkHandler delegate, String nullStr) {
         this.delegate = delegate;
         this.nullStr = nullStr;
@@ -31,6 +31,6 @@ public class NullableObjectHandler implements LandmarkHandler {
         if (l == 0) {
             return nullStr;
         }
-        return delegate.getLandmarkName(l-1);
+        return delegate.getLandmarkName(l - 1);
     }
 }

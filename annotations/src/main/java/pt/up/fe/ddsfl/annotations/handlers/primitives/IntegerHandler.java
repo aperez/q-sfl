@@ -6,8 +6,8 @@ import pt.up.fe.ddsfl.annotations.handlers.NumericHandler;
 public class IntegerHandler extends NumericHandler {
 
     @Override
-    public int handle(Object o) {
-        Integer value = (Integer)o;
+    protected int compareWithZero(Object o) {
+        Integer value = (Integer) o;
         return value.compareTo(Integer.valueOf(0));
     }
 
