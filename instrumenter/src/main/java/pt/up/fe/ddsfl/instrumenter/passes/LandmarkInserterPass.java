@@ -9,6 +9,7 @@ import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
+import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.AccessFlag;
@@ -85,15 +86,13 @@ public class LandmarkInserterPass implements Pass {
         MethodInfo info = b.getMethodInfo();
         CodeAttribute ca = info.getCodeAttribute();
 
-        if ((b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
+        if (ca == null || (b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
             return;
         }
 
-        if (ca != null) {
-            if (b instanceof CtConstructor) {
-                if (((CtConstructor) b).isClassInitializer()) {
-                    return;
-                }
+        if (b instanceof CtConstructor) {
+            if (((CtConstructor) b).isClassInitializer()) {
+                return;
             }
         }
 
@@ -111,18 +110,24 @@ public class LandmarkInserterPass implements Pass {
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
 
             LandmarkHandler handler = getLandmarkHandler(params[i], paramsAnnotations[i], false);
-            if (handler == null || handler.landmarks() < 2) {
-                continue;
-            }
-
-            insertLandmark(c, b, parameterNode, handlers, "$args[" + i + "]", handler);
+            insertLandmark(c, b, parameterNode, handlers, "$args[" + i + "]", handler, false);
         }
 
-        //return value landmarks
+        if (b instanceof CtMethod) {
+            CtClass returnType = ((CtMethod) b).getReturnType();
+            if (returnType != CtClass.voidType) {
+                LandmarkHandler handler = getLandmarkHandler(returnType, b.getAvailableAnnotations(), true);
+                insertLandmark(c, b, n, handlers, "($w)$_", handler, true);
+            }
+        }
     }
 
     private void insertLandmark(CtClass c, CtBehavior b, Node node, List<LandmarkHandler> handlers, String variable,
-            LandmarkHandler handler) throws CannotCompileException {
+            LandmarkHandler handler, boolean isReturn) throws CannotCompileException {
+        if (handler == null || handler.landmarks() < 2) {
+            return;
+        }
+
         Collector collector = Collector.instance();
 
         int offset = 0;
@@ -138,11 +143,18 @@ public class LandmarkInserterPass implements Pass {
 
         int landmark = handlers.size();
         handlers.add(handler);
-        b.insertBefore("{ " + InstrumentationPass.HIT_VECTOR_NAME + "[" + offset + "+" + LANDMARK_VECTOR_NAME + "["
-                + landmark + "].handle(" + variable + ")" + "] = true; }");
+        String toInject = "{ " + InstrumentationPass.HIT_VECTOR_NAME + "[" + offset + "+" + LANDMARK_VECTOR_NAME + "["
+                + landmark + "].handle(" + variable + ")] = true; }";
+        if (isReturn) {
+            b.insertAfter(toInject);
+        } else {
+            b.insertBefore(toInject);
+        }
+
     }
 
-    private LandmarkHandler getLandmarkHandler(CtClass paramType, Object[] annotations, boolean isReturn) throws NotFoundException {
+    private LandmarkHandler getLandmarkHandler(CtClass paramType, Object[] annotations, boolean isReturn)
+            throws NotFoundException {
         if (!dispatcher.overrideAnnotations()) {
             LandmarkHandler handler = processAnnotations(annotations);
             if (handler != null) {
@@ -160,13 +172,13 @@ public class LandmarkInserterPass implements Pass {
         for (Object o : annotations) {
             try {
                 Method m = o.getClass().getDeclaredMethod("type");
-                if(m.invoke(o) != LandmarkAnnotation.class) {
+                if (m.invoke(o) != LandmarkAnnotation.class) {
                     continue;
                 }
                 m = o.getClass().getDeclaredMethod("handler");
                 Object ret = m.invoke(o);
                 if (ret instanceof Class<?>) {
-                    LandmarkHandler handler = (LandmarkHandler)((Class<?>)ret).newInstance();
+                    LandmarkHandler handler = (LandmarkHandler) ((Class<?>) ret).newInstance();
                     return handler;
                 }
             } catch (Exception e) {
