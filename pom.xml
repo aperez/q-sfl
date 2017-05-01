@@ -32,5 +32,6 @@
         <module>annotations</module>
         <module>instrumenter</module>
         <module>diagnoser</module>
+        <module>maven-plugin</module>
     </modules>
 </project>
