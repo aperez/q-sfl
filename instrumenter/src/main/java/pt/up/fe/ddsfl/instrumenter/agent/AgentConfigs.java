@@ -9,7 +9,7 @@ import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import javassist.Modifier;
 import pt.up.fe.ddsfl.common.events.EventListener;
-import pt.up.fe.ddsfl.common.events.VerboseEventListener;
+import pt.up.fe.ddsfl.common.events.NullEventListener;
 import pt.up.fe.ddsfl.common.messaging.Client;
 import pt.up.fe.ddsfl.instrumenter.granularity.GranularityFactory.GranularityLevel;
 import pt.up.fe.ddsfl.instrumenter.matchers.BlackList;
@@ -102,7 +102,7 @@ public class AgentConfigs {
         if (getPort() != -1) {
             return new Client(getPort());
         } else {
-            return new VerboseEventListener();
+            return new NullEventListener();
         }
     }
 
