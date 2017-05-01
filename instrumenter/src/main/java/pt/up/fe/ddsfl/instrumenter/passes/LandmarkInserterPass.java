@@ -59,7 +59,10 @@ public class LandmarkInserterPass implements Pass {
 
         List<LandmarkHandler> handlers = new ArrayList<LandmarkHandler>();
         for (CtBehavior b : c.getDeclaredBehaviors()) {
-            handleBehavior(c, b, handlers);
+            try {
+                handleBehavior(c, b, handlers);
+            } catch (Exception e) {
+            }
         }
         Collector.instance().addLandmarkVector(c.getName(), handlers);
 
@@ -103,10 +106,14 @@ public class LandmarkInserterPass implements Pass {
         CtClass[] params = b.getParameterTypes();
         Object[][] paramsAnnotations = b.getAvailableParameterAnnotations();
         int pos = Modifier.isStatic(b.getModifiers()) ? 0 : 1;
+        pos += Modifier.isSynchronized(b.getModifiers()) ? 1 : 0;
 
         for (int i = 0; i < params.length; i++) {
-
-            String parameterName = attr.variableName(i + pos);
+            String parameterName = "argument#"+i;
+            try {
+                parameterName = attr.variableName(i + pos);
+            } catch (Exception e) {
+            }
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
 
             LandmarkHandler handler = getLandmarkHandler(params[i], paramsAnnotations[i], false);

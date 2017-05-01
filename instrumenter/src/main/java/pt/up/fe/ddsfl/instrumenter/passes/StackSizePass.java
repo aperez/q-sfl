@@ -9,15 +9,21 @@ public class StackSizePass implements Pass {
 
     @Override
     public final Outcome transform(CtClass c) throws Exception {
-        for (CtBehavior b : c.getDeclaredBehaviors()) {
-            MethodInfo info = b.getMethodInfo();
-            CodeAttribute ca = info.getCodeAttribute();
+        try {
+            for (CtBehavior b : c.getDeclaredBehaviors()) {
+                MethodInfo info = b.getMethodInfo();
+                CodeAttribute ca = info.getCodeAttribute();
 
-            if (ca != null) {
-                int ss = ca.computeMaxStack();
-                ca.setMaxStack(ss);
+                if (ca != null) {
+                    int ss = ca.computeMaxStack();
+                    ca.setMaxStack(ss);
+                }
             }
         }
+        catch (Exception e) {
+            return Outcome.CANCEL;
+        }
+
 
         return Outcome.CONTINUE;
     }

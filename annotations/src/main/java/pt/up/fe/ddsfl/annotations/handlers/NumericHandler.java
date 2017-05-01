@@ -4,7 +4,7 @@ public abstract class NumericHandler implements LandmarkHandler {
 
     @Override
     public int handle(Object o) {
-        return 1 + compareWithZero(o);
+        return 1 + Integer.signum(compareWithZero(o));
     }
 
     protected abstract int compareWithZero(Object o);
