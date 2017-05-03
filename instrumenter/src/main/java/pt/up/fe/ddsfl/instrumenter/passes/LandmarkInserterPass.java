@@ -94,6 +94,10 @@ public class LandmarkInserterPass implements Pass {
             return;
         }
 
+        boolean skipMemberParameter =  b instanceof CtConstructor &&
+                c.getDeclaringClass() != null &&
+                !Modifier.isStatic(c.getModifiers());
+
         MethodInfo info = b.getMethodInfo();
         CodeAttribute ca = info.getCodeAttribute();
 
@@ -103,13 +107,13 @@ public class LandmarkInserterPass implements Pass {
         LocalVariableAttribute attr = (LocalVariableAttribute) ca.getAttribute(LocalVariableAttribute.tag);
         CtClass[] params = b.getParameterTypes();
         Object[][] paramsAnnotations = b.getAvailableParameterAnnotations();
-        int pos = Modifier.isStatic(b.getModifiers()) ? 0 : 1;
+        int pos = (Modifier.isStatic(b.getModifiers()) || skipMemberParameter) ? 0 : 1;
 
-        for (int i = 0; i < params.length; i++) {
-            String parameterName = "argument#"+i;
-            try {
+        int i = skipMemberParameter ? 1 : 0;
+        for (; i < params.length; i++) {
+            String parameterName = "parameter#"+i;
+            if (attr != null && attr.tableLength() > i + pos) {
                 parameterName = attr.variableName(i + pos);
-            } catch (Exception e) {
             }
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
 
