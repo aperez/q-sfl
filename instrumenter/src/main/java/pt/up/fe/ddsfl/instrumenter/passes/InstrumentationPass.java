@@ -4,6 +4,7 @@ import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
+import javassist.NotFoundException;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.CodeAttribute;
@@ -37,58 +38,69 @@ public class InstrumentationPass implements Pass {
         f.setModifiers(f.getModifiers() | AccessFlag.SYNTHETIC);
         c.addField(f);
 
+        // make class initializer
+        CtConstructor initializer = c.makeClassInitializer();
+        initializer.insertBefore(getVectorInitializer(c));
+
         for (CtBehavior b : c.getDeclaredBehaviors()) {
             handleBehavior(c, b);
         }
 
-        // make class initializer
-        CtConstructor initializer = c.makeClassInitializer();
-        initializer.insertBefore(HIT_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
-                + ".instance().getHitVector(\"" + c.getName() + "\");");
-
         return Outcome.CONTINUE;
     }
 
-    private void handleBehavior(CtClass c, CtBehavior b) throws Exception {
+    public static String getVectorInitializer(CtClass c) {
+        return HIT_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
+                + ".instance().getHitVector(\"" + c.getName() + "\");";
+    }
+
+    public static boolean toSkip(CtClass c, CtBehavior b) throws NotFoundException {
         MethodInfo info = b.getMethodInfo();
         CodeAttribute ca = info.getCodeAttribute();
 
-        // skip synthetic methods
-        if ((b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
+        if (ca == null || (b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
+            return true;
+        }
+
+        if (b instanceof CtConstructor) {
+            return ((CtConstructor) b).isClassInitializer() || c.getEnclosingBehavior() != null || c.isEnum();
+
+        }
+        return false;
+    }
+
+    private void handleBehavior(CtClass c, CtBehavior b) throws Exception {
+        if (toSkip(c, b)) {
             return;
         }
 
-        if (ca != null) {
+        MethodInfo info = b.getMethodInfo();
+        CodeAttribute ca = info.getCodeAttribute();
+        CodeIterator ci = ca.iterator();
 
-            CodeIterator ci = ca.iterator();
+        if (b instanceof CtConstructor) {
+            ci.skipConstructor();
+        }
 
-            if (b instanceof CtConstructor) {
-                if (((CtConstructor) b).isClassInitializer()) {
-                    return;
-                }
-                ci.skipConstructor();
+        Granularity g = GranularityFactory.getGranularity(c, info, ci, granularity);
+
+        for (int instrSize = 0, index, curLine; ci.hasNext();) {
+            index = ci.next();
+
+            curLine = info.getLineNumber(index);
+
+            if (curLine == -1)
+                continue;
+
+            if (g.instrumentAtIndex(index, instrSize)) {
+                Node n = g.getNode(c, b, curLine);
+                Bytecode bc = getInstrumentationCode(c, n, info.getConstPool());
+                ci.insert(index, bc.get());
+                instrSize += bc.length();
             }
 
-            Granularity g = GranularityFactory.getGranularity(c, info, ci, granularity);
-
-            for (int instrSize = 0, index, curLine; ci.hasNext();) {
-                index = ci.next();
-
-                curLine = info.getLineNumber(index);
-
-                if (curLine == -1)
-                    continue;
-
-                if (g.instrumentAtIndex(index, instrSize)) {
-                    Node n = g.getNode(c, b, curLine);
-                    Bytecode bc = getInstrumentationCode(c, n, info.getConstPool());
-                    ci.insert(index, bc.get());
-                    instrSize += bc.length();
-                }
-
-                if (g.stopInstrumenting())
-                    break;
-            }
+            if (g.stopInstrumenting())
+                break;
         }
     }
 

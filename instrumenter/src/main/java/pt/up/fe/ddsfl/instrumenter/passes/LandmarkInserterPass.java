@@ -40,7 +40,7 @@ public class LandmarkInserterPass implements Pass {
             //check if class contains instrumentation field
             c.getDeclaredField(InstrumentationPass.HIT_VECTOR_NAME);
         } catch (Exception e) {
-            return Outcome.CONTINUE;
+            return Outcome.CANCEL;
         }
 
         dispatcher = getLandmarkDispatcher(c);
@@ -54,8 +54,7 @@ public class LandmarkInserterPass implements Pass {
         c.addField(f);
 
         CtConstructor initializer = c.makeClassInitializer();
-        initializer.insertBefore(LANDMARK_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
-                + ".instance().getLandmarkVector(\"" + c.getName() + "\");");
+        initializer.insertBefore(getVectorInitializer(c));
 
         List<LandmarkHandler> handlers = new ArrayList<LandmarkHandler>();
         for (CtBehavior b : c.getDeclaredBehaviors()) {
@@ -67,6 +66,11 @@ public class LandmarkInserterPass implements Pass {
         Collector.instance().addLandmarkVector(c.getName(), handlers);
 
         return Outcome.CONTINUE;
+    }
+
+    public static String getVectorInitializer(CtClass c) {
+        return "{" + LANDMARK_VECTOR_NAME + " = " + Collector.class.getCanonicalName()
+                + ".instance().getLandmarkVector(\"" + c.getName() + "\");}";
     }
 
     private Dispatcher getLandmarkDispatcher(CtClass c) {
@@ -86,18 +90,12 @@ public class LandmarkInserterPass implements Pass {
     }
 
     private void handleBehavior(CtClass c, CtBehavior b, List<LandmarkHandler> handlers) throws Exception {
-        MethodInfo info = b.getMethodInfo();
-        CodeAttribute ca = info.getCodeAttribute();
-
-        if (ca == null || (b.getModifiers() & AccessFlag.SYNTHETIC) != 0) {
+        if(InstrumentationPass.toSkip(c, b)) {
             return;
         }
 
-        if (b instanceof CtConstructor) {
-            if (((CtConstructor) b).isClassInitializer()) {
-                return;
-            }
-        }
+        MethodInfo info = b.getMethodInfo();
+        CodeAttribute ca = info.getCodeAttribute();
 
         Node n = NodeRetriever.getNode(c, b);
         Collector collector = Collector.instance();
@@ -106,7 +104,6 @@ public class LandmarkInserterPass implements Pass {
         CtClass[] params = b.getParameterTypes();
         Object[][] paramsAnnotations = b.getAvailableParameterAnnotations();
         int pos = Modifier.isStatic(b.getModifiers()) ? 0 : 1;
-        pos += Modifier.isSynchronized(b.getModifiers()) ? 1 : 0;
 
         for (int i = 0; i < params.length; i++) {
             String parameterName = "argument#"+i;
@@ -154,6 +151,8 @@ public class LandmarkInserterPass implements Pass {
                 + landmark + "].handle(" + variable + ")] = true; }";
         if (isReturn) {
             b.insertAfter(toInject);
+        } else if (b instanceof CtConstructor) {
+            ((CtConstructor)b).insertBeforeBody(toInject);
         } else {
             b.insertBefore(toInject);
         }

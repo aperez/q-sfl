@@ -75,7 +75,7 @@ public class NodeRetriever {
 
         int idx = name.lastIndexOf('$');
         if (idx != -1) {
-            name = name.substring(idx);
+            name = name.substring(idx+1);
         }
 
         return name;
