@@ -8,6 +8,8 @@ import flexjson.JSON;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import javassist.Modifier;
+import pt.up.fe.ddsfl.annotations.dispatchers.Dispatcher;
+import pt.up.fe.ddsfl.annotations.handlers.LandmarkHandler;
 import pt.up.fe.ddsfl.common.events.EventListener;
 import pt.up.fe.ddsfl.common.events.NullEventListener;
 import pt.up.fe.ddsfl.common.messaging.Client;
@@ -15,6 +17,7 @@ import pt.up.fe.ddsfl.instrumenter.granularity.GranularityFactory.GranularityLev
 import pt.up.fe.ddsfl.instrumenter.matchers.BlackList;
 import pt.up.fe.ddsfl.instrumenter.matchers.DuplicateCollectorReferenceMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.FieldNameMatcher;
+import pt.up.fe.ddsfl.instrumenter.matchers.InterfaceMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.Matcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.ModifierMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.OrMatcher;
@@ -82,10 +85,15 @@ public class AgentConfigs {
 
         Matcher mMatcher = new OrMatcher(new ModifierMatcher(Modifier.NATIVE), new ModifierMatcher(Modifier.INTERFACE));
 
+        Matcher landmarkAspects = new OrMatcher (new InterfaceMatcher(LandmarkHandler.class.getName()),
+                new InterfaceMatcher(Dispatcher.class.getName()));
+
         Matcher alreadyInstrumented = new OrMatcher(new FieldNameMatcher(InstrumentationPass.HIT_VECTOR_NAME),
                 new DuplicateCollectorReferenceMatcher());
 
-        FilterPass fp = new FilterPass(new BlackList(mMatcher), new BlackList(pMatcher),
+        FilterPass fp = new FilterPass(new BlackList(mMatcher),
+                new BlackList(pMatcher),
+                new BlackList(landmarkAspects),
                 new BlackList(alreadyInstrumented));
 
         instrumentationPasses.addAll(passesToPrepend);
