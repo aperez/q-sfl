@@ -8,6 +8,11 @@ import org.junit.runner.notification.RunListener;
 public class TestListener extends RunListener {
 
     private boolean isError = false;
+    private boolean sendEndSession = true;
+
+    public void setSendEndSession(boolean sendEndSession) {
+        this.sendEndSession = sendEndSession;
+    }
 
     @Override
     public void testRunStarted(Description description) {
@@ -30,7 +35,9 @@ public class TestListener extends RunListener {
 
     @Override
     public void testRunFinished(Result result) {
-        Collector.instance().endSession();
+        if (sendEndSession) {
+            Collector.instance().endSession();
+        }
     }
 
     @Override
