@@ -15,6 +15,7 @@ import pt.up.fe.ddsfl.common.events.NullEventListener;
 import pt.up.fe.ddsfl.common.messaging.Client;
 import pt.up.fe.ddsfl.instrumenter.granularity.GranularityFactory.GranularityLevel;
 import pt.up.fe.ddsfl.instrumenter.matchers.BlackList;
+import pt.up.fe.ddsfl.instrumenter.matchers.ClassNamesMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.DuplicateCollectorReferenceMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.FieldNameMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.InterfaceMatcher;
@@ -22,10 +23,12 @@ import pt.up.fe.ddsfl.instrumenter.matchers.Matcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.ModifierMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.OrMatcher;
 import pt.up.fe.ddsfl.instrumenter.matchers.PrefixMatcher;
+import pt.up.fe.ddsfl.instrumenter.matchers.WhiteList;
 import pt.up.fe.ddsfl.instrumenter.passes.FilterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.InstrumentationPass;
 import pt.up.fe.ddsfl.instrumenter.passes.LandmarkInserterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.Pass;
+import pt.up.fe.ddsfl.instrumenter.passes.Pass.Outcome;
 import pt.up.fe.ddsfl.instrumenter.passes.StackSizePass;
 import pt.up.fe.ddsfl.instrumenter.passes.TestFilterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.VectorInitializationPass;
@@ -37,6 +40,8 @@ public class AgentConfigs {
     private List<String> prefixesToFilter = new ArrayList<String>();
 
     private List<Pass> passesToPrepend = new ArrayList<Pass>();
+    private ClassNamesMatcher classNamesMatcher = new ClassNamesMatcher();
+    private boolean filterClassNames = false;
 
     public void setPort(int port) {
         this.port = port;
@@ -44,6 +49,19 @@ public class AgentConfigs {
 
     public int getPort() {
         return port;
+    }
+
+    public void setFilterClassNames(boolean filter) {
+        this.filterClassNames = filter;
+    }
+
+    public boolean getFilterClassNames() {
+        return filterClassNames;
+    }
+
+    @JSON(include = false)
+    public ClassNamesMatcher getClassNamesMatcher() {
+        return this.classNamesMatcher;
     }
 
     public GranularityLevel getGranularityLevel() {
@@ -96,7 +114,11 @@ public class AgentConfigs {
                 new BlackList(landmarkAspects),
                 new BlackList(alreadyInstrumented));
 
+        FilterPass classFiltering = new FilterPass(new WhiteList(classNamesMatcher));
+        classFiltering.setFallbackOutcome(filterClassNames ? Outcome.CANCEL : Outcome.CONTINUE);
+
         instrumentationPasses.addAll(passesToPrepend);
+        instrumentationPasses.add(classFiltering);
         instrumentationPasses.add(fp);
         instrumentationPasses.add(new TestFilterPass());
         instrumentationPasses.add(new InstrumentationPass(granularityLevel));

@@ -30,10 +30,14 @@ public class ClassNamesMatcher implements Matcher {
 
     private boolean matches(String name) {
         for (String s : names) {
-            if (name.equals(s))
+            if (name.equals(s) || (name).startsWith(s+"$"))
                 return true;
         }
 
         return false;
+    }
+
+    public void add(String string) {
+        names.add(string);
     }
 }
