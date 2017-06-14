@@ -27,6 +27,7 @@ import pt.up.fe.ddsfl.instrumenter.matchers.WhiteList;
 import pt.up.fe.ddsfl.instrumenter.passes.FilterPass;
 import pt.up.fe.ddsfl.instrumenter.passes.InstrumentationPass;
 import pt.up.fe.ddsfl.instrumenter.passes.LandmarkInserterPass;
+import pt.up.fe.ddsfl.instrumenter.passes.ParameterDataPass;
 import pt.up.fe.ddsfl.instrumenter.passes.Pass;
 import pt.up.fe.ddsfl.instrumenter.passes.Pass.Outcome;
 import pt.up.fe.ddsfl.instrumenter.passes.StackSizePass;
@@ -43,6 +44,9 @@ public class AgentConfigs {
     private ClassNamesMatcher classNamesMatcher = new ClassNamesMatcher();
     private boolean filterClassNames = false;
 
+    private boolean instrumentLandmarks = false;
+    private boolean instrumentParameters = false;
+
     public void setPort(int port) {
         this.port = port;
     }
@@ -57,6 +61,22 @@ public class AgentConfigs {
 
     public boolean getFilterClassNames() {
         return filterClassNames;
+    }
+
+    public void setInstrumentLandmarks(boolean instrumentLandmarks) {
+        this.instrumentLandmarks = instrumentLandmarks;
+    }
+
+    public boolean getInstrumentLandmarks() {
+        return instrumentLandmarks;
+    }
+
+    public void setInstrumentParameters(boolean instrumentParameters) {
+        this.instrumentParameters = instrumentParameters;
+    }
+
+    public boolean getInstrumentParameters() {
+        return instrumentParameters;
     }
 
     @JSON(include = false)
@@ -123,8 +143,15 @@ public class AgentConfigs {
         instrumentationPasses.add(new TestFilterPass());
         instrumentationPasses.add(new InstrumentationPass(granularityLevel));
         instrumentationPasses.add(new StackSizePass());
-        instrumentationPasses.add(new LandmarkInserterPass());
-        instrumentationPasses.add(new StackSizePass());
+
+        if (instrumentLandmarks) {
+            instrumentationPasses.add(new LandmarkInserterPass());
+            instrumentationPasses.add(new StackSizePass());
+        } else if (instrumentParameters) {
+            instrumentationPasses.add(new ParameterDataPass());
+            instrumentationPasses.add(new StackSizePass());
+        }
+
         instrumentationPasses.add(new VectorInitializationPass());
         instrumentationPasses.add(new StackSizePass());
 

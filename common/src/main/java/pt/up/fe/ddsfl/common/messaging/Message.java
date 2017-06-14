@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import pt.up.fe.ddsfl.common.model.Node;
 
-public interface Message {
+public interface Message extends Serializable {
 
-    public static class HandshakeMessage implements Message, Serializable {
+    public static class HandshakeMessage implements Message {
 
         private static final long serialVersionUID = 4280869312305959655L;
         public final String id;
@@ -20,13 +20,13 @@ public interface Message {
         }
     }
 
-    public static class ByeMessage implements Message, Serializable {
+    public static class ByeMessage implements Message {
 
         private static final long serialVersionUID = -4155285280206362746L;
 
     }
 
-    public static class EndTransactionMessage implements Message, Serializable {
+    public static class EndTransactionMessage implements Message {
 
         private static final long serialVersionUID = 214052749607422773L;
         public final String transactionName;
@@ -44,7 +44,7 @@ public interface Message {
         }
     }
 
-    public static class AddNodeMessage implements Message, Serializable {
+    public static class AddNodeMessage implements Message {
 
         private static final long serialVersionUID = 3116251573538148450L;
         public final int id;
@@ -66,7 +66,7 @@ public interface Message {
         }
     }
 
-    public static class AddProbeMessage implements Message, Serializable {
+    public static class AddProbeMessage implements Message {
 
         private static final long serialVersionUID = 5328295583566424138L;
         public final int id;

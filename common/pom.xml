@@ -10,4 +10,12 @@
 
     <artifactId>ddsfl-common</artifactId>
     <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.flexjson</groupId>
+            <artifactId>flexjson</artifactId>
+            <version>3.2</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -7,7 +7,7 @@ import pt.up.fe.ddsfl.common.events.EventListener;
 import pt.up.fe.ddsfl.common.events.MultiEventListener;
 import pt.up.fe.ddsfl.common.model.Node;
 import pt.up.fe.ddsfl.common.model.Tree;
-import pt.up.fe.ddsfl.common.spectrum.SpectrumBuilder;
+import pt.up.fe.ddsfl.instrumenter.agent.AgentConfigs;
 import pt.up.fe.ddsfl.instrumenter.runtime.ProbeGroup.HitProbe;
 
 public class Collector {
@@ -17,28 +17,39 @@ public class Collector {
     private MultiEventListener listener;
     private Tree tree;
     private HitVector hitVector;
-    private SpectrumBuilder builder;
+    //private SpectrumBuilder builder;
     private LandmarkVector landmarkVector;
+    private AgentConfigs configs;
 
     public static Collector instance() {
         return collector;
     }
 
-    public static void start(EventListener listener) {
+    public static Collector start(AgentConfigs configs) {
         if (collector == null) {
-            collector = new Collector(listener);
+            collector = new Collector(configs.getEventListener());
+            collector.setConfigs(configs);
         }
+        return collector;
     }
 
     private Collector(EventListener listener) {
         this.listener = new MultiEventListener();
-        this.builder = new SpectrumBuilder();
-        addListener(this.builder);
+        //this.builder = new SpectrumBuilder();
+        //addListener(this.builder);
         addListener(listener);
 
         this.tree = new Tree();
         this.hitVector = new HitVector();
         this.landmarkVector = new LandmarkVector();
+    }
+
+    private void setConfigs(AgentConfigs configs) {
+        this.configs = configs;
+    }
+
+    public AgentConfigs getConfigs() {
+        return this.configs;
     }
 
     public void addListener(EventListener listener) {
@@ -47,9 +58,9 @@ public class Collector {
         }
     }
 
-    public SpectrumBuilder getBuilder() {
-        return this.builder;
-    }
+    //public SpectrumBuilder getBuilder() {
+    //    return this.builder;
+    //}
 
     public synchronized Node createNode(Node parent, String name, Node.Type type, int line) {
         Node node = tree.addNode(name, type, parent.getId(), line);

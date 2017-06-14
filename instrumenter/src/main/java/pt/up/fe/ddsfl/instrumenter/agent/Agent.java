@@ -14,7 +14,7 @@ public class Agent {
             agentConfigs = new AgentConfigs(); // return;
         }
 
-        Collector.start(agentConfigs.getEventListener());
+        Collector.start(agentConfigs);
         ClassTransformer transformer = new ClassTransformer(agentConfigs.getInstrumentationPasses());
         inst.addTransformer(transformer);
 

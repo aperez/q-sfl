@@ -19,14 +19,20 @@ public class VectorInitializationPass implements Pass {
 
         try {
             c.getDeclaredField(InstrumentationPass.HIT_VECTOR_NAME);
-            c.getDeclaredField(LandmarkInserterPass.LANDMARK_VECTOR_NAME);
         } catch (Exception e) {
             return Outcome.CANCEL;
         }
 
+        boolean hasLandmarkVector = true;
+        try {
+            c.getDeclaredField(LandmarkInserterPass.LANDMARK_VECTOR_NAME);
+        } catch (Exception e) {
+            hasLandmarkVector = false;
+        }
+
         for (CtBehavior b : c.getDeclaredBehaviors()) {
             try {
-                handleBehavior(c, b);
+                handleBehavior(c, b, hasLandmarkVector);
             } catch (Exception e) {
             }
         }
@@ -34,13 +40,15 @@ public class VectorInitializationPass implements Pass {
         return Outcome.CONTINUE;
     }
 
-    private void handleBehavior(CtClass c, CtBehavior b) throws Exception {
+    private void handleBehavior(CtClass c, CtBehavior b, boolean hasLandmarkVector) throws Exception {
         if (InstrumentationPass.toSkip(c, b)) {
             return;
         }
 
-        String instrumentationStr = InstrumentationPass.getVectorInitializer(c) +
-                LandmarkInserterPass.getVectorInitializer(c);
+        String instrumentationStr = InstrumentationPass.getVectorInitializer(c);
+        if (hasLandmarkVector) {
+            instrumentationStr += LandmarkInserterPass.getVectorInitializer(c);
+        }
 
         if (b instanceof CtConstructor) {
             CtConstructor constructor = (CtConstructor) b;
