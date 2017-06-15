@@ -10,6 +10,14 @@ public class TestListener extends RunListener {
     private boolean isError = false;
     private boolean sendEndSession = true;
 
+    public TestListener() {
+        setSendEndSession(true);
+    }
+
+    public TestListener(boolean sendEndSession) {
+        setSendEndSession(sendEndSession);
+    }
+
     public void setSendEndSession(boolean sendEndSession) {
         this.sendEndSession = sendEndSession;
     }

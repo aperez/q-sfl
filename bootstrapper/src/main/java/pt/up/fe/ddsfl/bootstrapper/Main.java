@@ -5,8 +5,12 @@ import java.util.Scanner;
 
 import org.junit.runner.JUnitCore;
 
+import pt.up.fe.ddsfl.common.spectrum.NodeRecorder;
+import pt.up.fe.ddsfl.common.spectrum.ProbeRecorder;
+import pt.up.fe.ddsfl.common.spectrum.TransactionRecorder;
 import pt.up.fe.ddsfl.instrumenter.agent.AgentConfigs;
 import pt.up.fe.ddsfl.instrumenter.runtime.Collector;
+import pt.up.fe.ddsfl.instrumenter.runtime.TestListener;
 
 public class Main {
 
@@ -16,7 +20,12 @@ public class Main {
         String loadedClassesFilename = args[1];
 
         try {
-            AgentConfigs configs = Collector.instance().getConfigs();
+            Collector c = Collector.instance();
+            c.addListener(new NodeRecorder("nodes.txt"));
+            c.addListener(new ProbeRecorder("probes.txt"));
+            c.addListener(new TransactionRecorder("transactions.txt"));
+            AgentConfigs configs = c.getConfigs();
+
             File file = new File(loadedClassesFilename);
             Scanner sc = new Scanner(file);
             while(sc.hasNextLine()){
@@ -26,6 +35,8 @@ public class Main {
             sc.close();
 
             JUnitCore junit = new JUnitCore();
+            junit.addListener(new TestListener(false));
+
             file = new File(testsFilename);
             sc = new Scanner(file);
             while(sc.hasNextLine()){
