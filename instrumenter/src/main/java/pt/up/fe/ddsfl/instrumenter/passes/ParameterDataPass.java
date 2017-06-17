@@ -12,8 +12,11 @@ import pt.up.fe.ddsfl.common.model.Node;
 import pt.up.fe.ddsfl.common.model.Node.Type;
 import pt.up.fe.ddsfl.instrumenter.model.NodeRetriever;
 import pt.up.fe.ddsfl.instrumenter.runtime.Collector;
+import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeDispatcher;
 
 public class ParameterDataPass implements Pass {
+
+    private ValueProbeDispatcher dispatcher = new ValueProbeDispatcher();
 
     @Override
     public Outcome transform(CtClass c) throws Exception {
@@ -54,13 +57,24 @@ public class ParameterDataPass implements Pass {
                 parameterName = attr.variableName(i + pos);
             }
             Node parameterNode = collector.createNode(n, parameterName, Type.PARAMETER, n.getLine());
-            //insert "$args[" + i + "]" data probe (parameterNode node)
+
+            String toInject = dispatcher.getInstrumentationString(params[i], parameterNode.getId(), "$args["+i+"]");
+            if (toInject == null) {
+                continue;
+            }
+
+            if (b instanceof CtConstructor) {
+                ((CtConstructor) b).insertBeforeBody(toInject);
+            } else {
+                b.insertBefore(toInject);
+            }
         }
 
         if (b instanceof CtMethod) {
             CtClass returnType = ((CtMethod) b).getReturnType();
-            if (returnType != CtClass.voidType) {
-                //insert "($w)$_" data probe (n node)
+            String toInject = dispatcher.getInstrumentationString(returnType, n.getId(), "$(w)$_");
+            if (toInject != null) {
+                b.insertAfter(toInject);
             }
         }
     }
