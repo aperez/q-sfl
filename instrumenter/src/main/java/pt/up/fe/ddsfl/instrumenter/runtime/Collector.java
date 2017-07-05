@@ -5,10 +5,12 @@ import java.util.List;
 import pt.up.fe.ddsfl.annotations.handlers.LandmarkHandler;
 import pt.up.fe.ddsfl.common.events.EventListener;
 import pt.up.fe.ddsfl.common.events.MultiEventListener;
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.model.Node;
 import pt.up.fe.ddsfl.common.model.Tree;
 import pt.up.fe.ddsfl.instrumenter.agent.AgentConfigs;
 import pt.up.fe.ddsfl.instrumenter.runtime.ProbeGroup.HitProbe;
+import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbes;
 
 public class Collector {
 
@@ -79,6 +81,7 @@ public class Collector {
     }
 
     public synchronized void startTransaction() {
+        ValueProbes.reset();
         hitVector.reset();
     }
 
@@ -105,6 +108,10 @@ public class Collector {
 
     public synchronized void addLandmarkVector(String className, List<LandmarkHandler> landmarks) {
         landmarkVector.addLandmarkVector(className, landmarks);
+    }
+
+    public synchronized void handleMessage(Message message) {
+        listener.handleMessage(message);
     }
 
 }

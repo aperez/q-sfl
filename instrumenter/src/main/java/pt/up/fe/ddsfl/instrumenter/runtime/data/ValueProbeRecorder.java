@@ -1,4 +1,4 @@
-package pt.up.fe.ddsfl.common.spectrum;
+package pt.up.fe.ddsfl.instrumenter.runtime.data;
 
 import pt.up.fe.ddsfl.common.events.EventListener;
 import pt.up.fe.ddsfl.common.messaging.Message;
@@ -6,16 +6,16 @@ import pt.up.fe.ddsfl.common.messaging.Message.EndTransactionMessage;
 import pt.up.fe.ddsfl.common.messaging.MessageRecorder;
 import pt.up.fe.ddsfl.common.model.Node.Type;
 
-public class TransactionRecorder extends MessageRecorder implements EventListener {
+public class ValueProbeRecorder extends MessageRecorder implements EventListener {
 
-    public TransactionRecorder(String filename) {
+    public ValueProbeRecorder(String filename) {
         super(filename, true);
         transformBooleans();
     }
 
     @Override
     public void endTransaction(String transactionName, boolean[] activity, boolean isError) {
-        writeMessage(new EndTransactionMessage(transactionName, activity, isError));
+        writeMessage(new EndTransactionMessage(transactionName, null, isError));
     }
 
     @Override
@@ -33,6 +33,7 @@ public class TransactionRecorder extends MessageRecorder implements EventListene
 
     @Override
     public void handleMessage(Message message) {
+        writeMessage(message);
     }
 
 }

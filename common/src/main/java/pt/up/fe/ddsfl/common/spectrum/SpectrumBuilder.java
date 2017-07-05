@@ -1,6 +1,7 @@
 package pt.up.fe.ddsfl.common.spectrum;
 
 import pt.up.fe.ddsfl.common.events.EventListener;
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.model.Node;
 
 public class SpectrumBuilder implements EventListener {
@@ -36,6 +37,10 @@ public class SpectrumBuilder implements EventListener {
 
     @Override
     public void endSession() {
+    }
+
+    @Override
+    public void handleMessage(Message message) {
     }
 
 }

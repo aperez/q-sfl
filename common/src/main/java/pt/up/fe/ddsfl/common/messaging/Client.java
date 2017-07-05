@@ -123,4 +123,9 @@ public class Client implements EventListener {
     public void addProbe(int id, int nodeId) {
         postMessage(new AddProbeMessage(id, nodeId));
     }
+
+    @Override
+    public void handleMessage(Message message) {
+        //no messages via sockets for now
+    }
 }

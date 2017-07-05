@@ -1,5 +1,6 @@
 package pt.up.fe.ddsfl.common.events;
 
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.model.Node;
 
 public interface EventListener {
@@ -11,4 +12,6 @@ public interface EventListener {
     void addProbe(int id, int nodeId);
 
     void endSession();
+
+    void handleMessage(Message message);
 }

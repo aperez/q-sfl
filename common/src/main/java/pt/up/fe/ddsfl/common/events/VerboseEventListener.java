@@ -2,6 +2,7 @@ package pt.up.fe.ddsfl.common.events;
 
 import java.util.Arrays;
 
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.model.Node;
 
 public class VerboseEventListener implements EventListener {
@@ -24,6 +25,11 @@ public class VerboseEventListener implements EventListener {
     @Override
     public void endSession() {
         System.out.println("End Session");
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+        System.out.println("Received message");
     }
 
 }

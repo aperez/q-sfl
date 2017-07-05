@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.model.Node;
 
 public class MultiEventListener implements EventListener {
@@ -44,6 +45,13 @@ public class MultiEventListener implements EventListener {
     public void endSession() {
         for (EventListener el : eventListeners) {
             el.endSession();
+        }
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+        for (EventListener el : eventListeners) {
+            el.handleMessage(message);
         }
     }
 

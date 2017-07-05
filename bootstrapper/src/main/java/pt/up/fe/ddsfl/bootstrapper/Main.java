@@ -11,6 +11,7 @@ import pt.up.fe.ddsfl.common.spectrum.TransactionRecorder;
 import pt.up.fe.ddsfl.instrumenter.agent.AgentConfigs;
 import pt.up.fe.ddsfl.instrumenter.runtime.Collector;
 import pt.up.fe.ddsfl.instrumenter.runtime.TestListener;
+import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeRecorder;
 
 public class Main {
 
@@ -24,6 +25,7 @@ public class Main {
             c.addListener(new NodeRecorder("nodes.txt"));
             c.addListener(new ProbeRecorder("probes.txt"));
             c.addListener(new TransactionRecorder("transactions.txt"));
+            c.addListener(new ValueProbeRecorder("valueprobes.txt"));
             AgentConfigs configs = c.getConfigs();
 
             File file = new File(loadedClassesFilename);

@@ -1,6 +1,7 @@
 package pt.up.fe.ddsfl.common.spectrum;
 
 import pt.up.fe.ddsfl.common.events.EventListener;
+import pt.up.fe.ddsfl.common.messaging.Message;
 import pt.up.fe.ddsfl.common.messaging.Message.AddNodeMessage;
 import pt.up.fe.ddsfl.common.messaging.MessageRecorder;
 import pt.up.fe.ddsfl.common.model.Node.Type;
@@ -27,6 +28,10 @@ public class NodeRecorder extends MessageRecorder implements EventListener {
 
     @Override
     public void addProbe(int id, int nodeId) {
+    }
+
+    @Override
+    public void handleMessage(Message message) {
     }
 
 }

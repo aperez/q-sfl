@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import flexjson.JSONSerializer;
+import flexjson.transformer.AbstractTransformer;
 
 public class MessageRecorder {
 
@@ -21,10 +22,24 @@ public class MessageRecorder {
             fw = null;
             bw = null;
         }
-        
+
         if (excludeClass) {
             serializer = serializer.exclude("*.class");
         }
+    }
+
+    protected void transformBooleans() {
+        serializer = serializer.transform(new AbstractTransformer() {
+            @Override
+            public void transform(Object object) {
+                if( object == null ) {
+                    getContext().write("null");
+                }
+                else {
+                    getContext().write(Integer.toString(((Boolean) object)? 1: 0));
+                }
+            }
+        }, Boolean.class);
     }
 
     public void writeMessage(Message message) {
