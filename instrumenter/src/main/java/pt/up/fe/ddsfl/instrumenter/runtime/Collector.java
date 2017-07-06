@@ -81,7 +81,7 @@ public class Collector {
     }
 
     public synchronized void startTransaction() {
-        ValueProbes.reset();
+        ValueProbes.reset(configs.getMaxValueProbes());
         hitVector.reset();
     }
 

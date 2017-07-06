@@ -15,12 +15,10 @@ import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.StringSizeMes
 
 public class ValueProbes {
 
-    public final static int MAX_PROBES = 10;
-
     public static int[] counters = new int[9];
 
-    public synchronized static void reset() {
-        Arrays.fill(counters, MAX_PROBES);
+    public synchronized static void reset(int maxProbes) {
+        Arrays.fill(counters, maxProbes);
     }
 
     public synchronized static void handleObject(int node, Object object) {

@@ -47,6 +47,8 @@ public class AgentConfigs {
     private boolean instrumentLandmarks = false;
     private boolean instrumentParameters = false;
 
+    private int maxValueProbes = 10000;
+
     public void setPort(int port) {
         this.port = port;
     }
@@ -177,5 +179,13 @@ public class AgentConfigs {
         } catch (Throwable t) {
             return null;
         }
+    }
+
+    public int getMaxValueProbes() {
+        return maxValueProbes;
+    }
+
+    public void setMaxValueProbes(int maxProbes) {
+        this.maxValueProbes = maxProbes;
     }
 }
