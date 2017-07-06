@@ -107,4 +107,17 @@ public class ValueProbeMessages {
             this.value = value;
         }
     }
+
+    public static class StringSizeMessage implements Message {
+
+        private static final long serialVersionUID = -233901504257981850L;
+        public int node;
+        public int value;
+        public final char t = 'S';
+
+        public StringSizeMessage(int node, int value) {
+            this.node = node;
+            this.value = value;
+        }
+    }
 }

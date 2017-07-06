@@ -21,6 +21,7 @@ public class ValueProbeDispatcher {
         typeToHandler.put(float.class.getName(), "handleFloat");
         typeToHandler.put(double.class.getName(), "handleDouble");
         typeToHandler.put(boolean.class.getName(), "handleBoolean");
+        typeToHandler.put(String.class.getName(), "handleString");
     }
 
     public String getInstrumentationString(CtClass c, int nodeId, String variableName) {

@@ -9,6 +9,7 @@ import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.IntegerMessag
 import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.LongMessage;
 import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.ObjectMessage;
 import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.ShortMessage;
+import pt.up.fe.ddsfl.instrumenter.runtime.data.ValueProbeMessages.StringSizeMessage;
 
 public class ValueProbes {
 
@@ -22,6 +23,11 @@ public class ValueProbes {
     public synchronized static void handleObject(int node, Object object) {
         if (--counter < 0) { return; }
         Collector.instance().handleMessage(new ObjectMessage(node, object != null));
+    }
+
+    public synchronized static void handleString(int node, Object object) {
+        if (--counter < 0) { return; }
+        Collector.instance().handleMessage(new StringSizeMessage(node, object == null ? -1 : ((String)object).length()));
     }
 
     public synchronized static void handleByte(int node, Object object) {
