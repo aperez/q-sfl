@@ -16,12 +16,12 @@ public class ProbeRecorder extends MessageRecorder implements EventListener {
     public void addProbe(int id, int nodeId) {
         writeMessage(new AddProbeMessage(id, nodeId));
     }
-    
+
     @Override
     public void endSession() {
         close();
     }
-    
+
     @Override
     public void endTransaction(String transactionName, boolean[] activity, boolean isError) {  
     }
