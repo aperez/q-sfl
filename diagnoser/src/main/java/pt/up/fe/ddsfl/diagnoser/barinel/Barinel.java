@@ -15,7 +15,7 @@ public class Barinel {
     private SpectrumFilter spectrum;	
     public double lambda = 1.0;
     public double epsilon = 0.0001;
-    public double pr = 0.001;
+    public double pr = 0.01;
 
     public Barinel() {
     }
@@ -137,8 +137,8 @@ public class Barinel {
             double goodness = goodnesses[i];
             newGoodnesses[i] = goodness + this.lambda * goodness / grad[i];
 
-            if (newGoodnesses[i] < 0)
-                newGoodnesses[i] = 0;
+            if (newGoodnesses[i] <= 0)
+                newGoodnesses[i] = this.epsilon;
             else if (newGoodnesses[i] > 1)
                 newGoodnesses[i] = 1;
         }

@@ -40,9 +40,9 @@ public class SpectrumImpl implements Spectrum {
     }
 
     public class Transaction {
-        private final String name;
-        private final BitSet activity;
-        private final boolean isError;
+        private String name;
+        private BitSet activity;
+        private boolean isError;
 
         public Transaction(String name, boolean[] activityArray, boolean isError) {
             this.name = name;
@@ -112,13 +112,13 @@ public class SpectrumImpl implements Spectrum {
             }
 
             if (isError(t)) {
-                System.out.print("x");
+                System.out.println("x");
             } else {
-                System.out.print(".");
+                System.out.println(".");
             }
         }
 
-        System.out.println("Number of probes: " + probes.size() + " number of transactions: " + transactions.size());
+        System.out.println("Number of probes: " + probes.size() + " - number of transactions: " + transactions.size());
     }
 
     @Override

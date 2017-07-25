@@ -13,7 +13,7 @@ import pt.up.fe.ddsfl.diagnoser.util.StopCriteria;
 public class MHS {
 
     private Trie candidates;
-    private double heuristicThreshold = 0.001;
+    private double heuristicThreshold = 0.05;
     private SimilarityFunction similarity = SimilarityRanker.OCHIAI; 
 
     public MHSStopCriteria stopCriteria;
@@ -24,6 +24,7 @@ public class MHS {
 
     public Trie generate(SpectrumFilter sf) {
         this.candidates = new Trie();
+        sf = sf.copy();
 
         this.stopCriteria.start();
         sf.filterPassingTransactions();
@@ -64,7 +65,7 @@ public class MHS {
     }
 
     public static class MHSStopCriteria extends StopCriteria {
-        public int maxCandidateLength = 0;
+        public int maxCandidateLength = 6;
 
         public boolean stop(Candidate candidate) {
             return test(candidate.length(), maxCandidateLength) || stop();
