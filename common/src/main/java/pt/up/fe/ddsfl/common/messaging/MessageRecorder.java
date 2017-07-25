@@ -42,7 +42,7 @@ public class MessageRecorder {
         }, Boolean.class);
     }
 
-    public void writeMessage(Message message) {
+    protected void writeMessage(Message message) {
         if (bw != null) {
             try {
                 bw.write(serializer.deepSerialize(message));
