@@ -1,4 +1,4 @@
-package pt.up.fe.ddsfl.instrumenter.spectrum.diagnosis;
+package pt.up.fe.ddsfl.diagnoser;
 
 import java.util.Arrays;
 
