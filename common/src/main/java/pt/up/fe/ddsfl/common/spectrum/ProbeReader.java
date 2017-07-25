@@ -7,7 +7,7 @@ import pt.up.fe.ddsfl.common.messaging.MessageReader;
 public class ProbeReader extends MessageReader<AddProbeMessage> {
 
     public ProbeReader(String filename) {
-        super(filename);
+        super(filename, AddProbeMessage.class);
     }
 
     @Override

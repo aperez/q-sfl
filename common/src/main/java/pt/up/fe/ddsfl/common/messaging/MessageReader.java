@@ -15,8 +15,9 @@ public abstract class MessageReader<M> {
     private BufferedReader br = null;
     private FileReader fr = null;
     protected JSONDeserializer<M> deserializer = new JSONDeserializer<M>();
+    protected Class<M> type;
 
-    public MessageReader(String filename) {
+    public MessageReader(String filename, Class<M> type) {
         try {
             fr = new FileReader(filename);
             br = new BufferedReader(fr);
@@ -24,6 +25,7 @@ public abstract class MessageReader<M> {
             fr = null;
             br = null;
         }
+        this.type = type;
     }
 
     protected void transformBooleans() {
@@ -43,7 +45,7 @@ public abstract class MessageReader<M> {
             try {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    M object = deserializer.deserialize(line);
+                    M object = deserializer.deserialize(line, type);
                     dispatch(listener, object);
                 }
             } catch (IOException e) {

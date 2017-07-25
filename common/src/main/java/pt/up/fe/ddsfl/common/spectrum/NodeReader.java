@@ -7,7 +7,7 @@ import pt.up.fe.ddsfl.common.messaging.MessageReader;
 public class NodeReader extends MessageReader<AddNodeMessage> {
 
     public NodeReader(String filename) {
-        super(filename);
+        super(filename, AddNodeMessage.class);
     }
 
     @Override

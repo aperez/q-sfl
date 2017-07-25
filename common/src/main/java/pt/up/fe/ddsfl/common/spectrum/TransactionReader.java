@@ -7,7 +7,7 @@ import pt.up.fe.ddsfl.common.messaging.MessageReader;
 public class TransactionReader extends MessageReader<EndTransactionMessage> {
 
     public TransactionReader(String filename) {
-        super(filename);
+        super(filename, EndTransactionMessage.class);
         transformBooleans();
     }
 
