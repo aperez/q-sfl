@@ -24,6 +24,12 @@
             <version>0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>pt.up.fe.ddsfl</groupId>
+            <artifactId>ddsfl-diagnoser</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
