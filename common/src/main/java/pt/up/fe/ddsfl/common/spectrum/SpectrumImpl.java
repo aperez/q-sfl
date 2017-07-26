@@ -88,7 +88,11 @@ public class SpectrumImpl implements Spectrum {
         this.tree = tree;
     }
 
-    public void addProbe(int id, int nodeId) {
+    public int addProbe(int id, int nodeId) {
+        if (id == -1) {
+            id = probes.size();
+        }
+
         probes.ensureCapacity(id + 1);
 
         while (probes.size() <= id) {
@@ -96,6 +100,7 @@ public class SpectrumImpl implements Spectrum {
         }
 
         probes.set(id, nodeId);
+        return id;
     }
 
     public void print() {
