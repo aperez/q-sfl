@@ -1,6 +1,7 @@
 package pt.up.fe.ddsfl.diagnoser.barinel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +70,7 @@ public class BarinelRecorder extends MessageRecorder {
             messages.add(new BarinelResultMessage(entry.getKey(), entry.getValue()));
         }
 
-        messages.sort(new Comparator<BarinelResultMessage>() {
+        Collections.sort(messages, new Comparator<BarinelResultMessage>() {
             @Override
             public int compare(BarinelResultMessage o1, BarinelResultMessage o2) {
                 return Double.compare(o2.score, o1.score);
