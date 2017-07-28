@@ -43,7 +43,6 @@ public class BarinelRecorder extends MessageRecorder {
         List<BarinelResultMessage> messages = new ArrayList<BarinelResultMessage>();
 
         for (Result result : results) {
-            System.out.println(result);
             for (Integer probe : result.candidate) {
                 Node node = spectrum.getNodeOfProbe(probe);
 

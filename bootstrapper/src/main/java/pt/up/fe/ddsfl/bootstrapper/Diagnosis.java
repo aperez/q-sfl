@@ -16,20 +16,29 @@ import pt.up.fe.ddsfl.diagnoser.barinel.Barinel.Result;
 import pt.up.fe.ddsfl.diagnoser.barinel.BarinelRecorder;
 import pt.up.fe.ddsfl.diagnoser.barinel.MHS;
 import pt.up.fe.ddsfl.diagnoser.trie.Trie;
+import pt.up.fe.ddsfl.instrumenter.runtime.data.AugmentedTransactionReader;
 
 public class Diagnosis {
 
     public static void main(String... args) {
         String path = args[0];
+        String landmarkCriterion = null;
+        if (args.length > 1) {
+            landmarkCriterion = args[1];
+        }
 
         SpectrumBuilder builder = new SpectrumBuilder();
 
         List<MessageReader> readers = new ArrayList<MessageReader>();
         readers.add(new NodeReader(path + "/nodes.txt"));
-        //readers.add(new NodeReader(path + "/landmarks.default.txt"));
+        if (landmarkCriterion != null) {
+            readers.add(new NodeReader(path + "/landmarks."+landmarkCriterion+".txt"));
+        }
         readers.add(new ProbeReader(path + "/probes.txt"));
         readers.add(new TransactionReader(path + "/transactions.txt"));
-        //readers.add(new AugmentedTransactionReader(path + "/transactions.default.txt"));
+        if (landmarkCriterion != null) {
+            readers.add(new AugmentedTransactionReader(path + "/transactions."+landmarkCriterion+".txt"));
+        }
 
         for (MessageReader reader : readers) {
             reader.read(builder);
@@ -42,7 +51,12 @@ public class Diagnosis {
             Trie trie = new MHS().generate(sf);
 
             List<Result> results = new Barinel().calculate(sf, trie);
-            BarinelRecorder br = new BarinelRecorder(path + "/barinel.txt");
+            BarinelRecorder br = null;
+            if (landmarkCriterion != null) {
+                br = new BarinelRecorder(path + "/barinel."+landmarkCriterion+".txt");
+            } else {
+                br = new BarinelRecorder(path + "/barinel.txt");
+            }
             br.write(spectrum, results);
             br.close();
         }
