@@ -1,6 +1,6 @@
 <lifecycles>
     <lifecycle>
-        <id>ddsfl</id>
+        <id>qsfl</id>
         <phases>
             <phase>
                 <id>initialize</id>
@@ -19,7 +19,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>pt.up.fe.ddsfl.instrumenter.runtime.TestListener</value>
+                            <value>pt.up.fe.qsfl.instrumenter.runtime.TestListener</value>
                         </property>
                     </properties>
                 </configuration>

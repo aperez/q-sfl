@@ -2,12 +2,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pt.up.fe.ddsfl</groupId>
-        <artifactId>ddsfl-parent</artifactId>
+        <groupId>pt.up.fe.qsfl</groupId>
+        <artifactId>qsfl-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>ddsfl-annotations</artifactId>
+    <artifactId>qsfl-annotations</artifactId>
     <packaging>jar</packaging>
 </project>

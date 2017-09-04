@@ -2,19 +2,19 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>pt.up.fe.ddsfl</groupId>
-        <artifactId>ddsfl-parent</artifactId>
+        <groupId>pt.up.fe.qsfl</groupId>
+        <artifactId>qsfl-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>ddsfl-diagnoser</artifactId>
+    <artifactId>qsfl-diagnoser</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>pt.up.fe.ddsfl</groupId>
-            <artifactId>ddsfl-common</artifactId>
+            <groupId>pt.up.fe.qsfl</groupId>
+            <artifactId>qsfl-common</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
