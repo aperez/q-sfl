@@ -1,5 +1,8 @@
 package pt.up.fe.qsfl.maven;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
@@ -10,38 +13,64 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import pt.up.fe.qsfl.common.messaging.Server;
+import pt.up.fe.qsfl.common.messaging.Service;
 import pt.up.fe.qsfl.instrumenter.agent.AgentConfigs;
+import pt.up.fe.qsfl.maven.service.InstrumentationRecorderService;
 
 @Mojo(name = "init")
 public class InitMojo extends AbstractMojo {
 
-    static final String QSFL_ARTIFACT = "pt.up.fe.qsfl:qsfl-instrumenter";
+	static final String QSFL_ARTIFACT = "pt.up.fe.qsfl:qsfl-instrumenter";
 
-    @Parameter(property = "plugin.artifactMap")
-    private Map<String, Artifact> pluginArtifactMap;
+	@Parameter(property = "plugin.artifactMap")
+	private Map<String, Artifact> pluginArtifactMap;
 
-    @Parameter(property = "project")
-    protected MavenProject project;
+	@Parameter(property = "project")
+	protected MavenProject project;
 
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+	@Parameter(defaultValue = "${project.build.directory}/qsfl/")
+	protected File reportDirectory;
 
-        Artifact artifact = pluginArtifactMap.get(QSFL_ARTIFACT);
+	@Override
+	public void execute() throws MojoExecutionException, MojoFailureException {
 
-        String agentFilename = artifact.getFile().getAbsolutePath();
-        
-        AgentConfigs agentConfigs = new AgentConfigs();
-        agentConfigs.addPrefixToFilter("org.apache.maven.", "junit.", "org.junit.", "org.hamcrest.", "org.mockito.");
+		reportDirectory.mkdirs();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(project.getProperties().getProperty("argLine", ""));
-        sb.append(" -javaagent:\"");
-        sb.append(agentFilename);
-        sb.append("\"=");
-        sb.append(agentConfigs.serialize());
-        
-        System.out.println("command line: " + sb.toString());
-        project.getProperties().setProperty("argLine", sb.toString());
-    }
+		Artifact artifact = pluginArtifactMap.get(QSFL_ARTIFACT);
+
+		String agentFilename = artifact.getFile().getAbsolutePath();
+
+		try {
+			ServerSocket serverSocket = new ServerSocket(0);
+			Server s = new Server(serverSocket, new Service.ServiceFactory() {
+				@Override
+				public Service create(String id) {
+					return InstrumentationRecorderService.getService(reportDirectory.getAbsolutePath() + "/");
+				}
+			});
+			s.start();
+
+			AgentConfigs agentConfigs = new AgentConfigs();
+			agentConfigs.setPort(s.getPort());
+			agentConfigs.setInstrumentLandmarks(true);
+			agentConfigs.addPrefixToFilter("org.apache.maven.", "junit.", "org.junit.", "org.hamcrest.", "org.mockito.");
+
+			StringBuilder sb = new StringBuilder();
+			sb.append(project.getProperties().getProperty("argLine", ""));
+			sb.append(" -javaagent:\"");
+			sb.append(agentFilename);
+			sb.append("\"=");
+			sb.append(agentConfigs.serialize());
+
+			System.out.println("command line: " + sb.toString());
+			project.getProperties().setProperty("argLine", sb.toString());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+	}
 
 }
