@@ -126,6 +126,6 @@ public class Client implements EventListener {
 
     @Override
     public void handleMessage(Message message) {
-        //no messages via sockets for now
+        postMessage(message);
     }
 }

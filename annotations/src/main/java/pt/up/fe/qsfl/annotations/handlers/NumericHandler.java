@@ -17,10 +17,10 @@ public abstract class NumericHandler implements LandmarkHandler {
     @Override
     public String getLandmarkName(int l) {
         if (l == 0) {
-            return "<0";
+            return "lt 0";
         } else if (l == 1) {
-            return "=0";
+            return "eq 0";
         }
-        return ">0";
+        return "gt 0";
     }
 }

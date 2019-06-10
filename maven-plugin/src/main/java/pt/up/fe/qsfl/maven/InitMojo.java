@@ -32,6 +32,9 @@ public class InitMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.build.directory}/qsfl/")
 	protected File reportDirectory;
 
+	@Parameter(defaultValue = "false")
+	protected boolean valueProbes;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -53,7 +56,11 @@ public class InitMojo extends AbstractMojo {
 
 			AgentConfigs agentConfigs = new AgentConfigs();
 			agentConfigs.setPort(s.getPort());
-			agentConfigs.setInstrumentLandmarks(true);
+			if (valueProbes) {
+				agentConfigs.setInstrumentParameters(true);
+			} else {
+				agentConfigs.setInstrumentLandmarks(true);
+			}
 			agentConfigs.addPrefixToFilter("org.apache.maven.", "junit.", "org.junit.", "org.hamcrest.", "org.mockito.");
 
 			StringBuilder sb = new StringBuilder();

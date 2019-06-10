@@ -85,6 +85,9 @@ public class Server extends ThreadedServer {
             } else if (o instanceof AddProbeMessage) {
                 AddProbeMessage apm = (AddProbeMessage) o;
                 eventListener.addProbe(apm.id, apm.nodeId);
+            } else if (o instanceof Message) {
+                Message m = (Message) o;
+                eventListener.handleMessage(m);
             }
 
             return false;

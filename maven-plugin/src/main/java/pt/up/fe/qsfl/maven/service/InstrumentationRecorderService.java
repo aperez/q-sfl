@@ -6,6 +6,7 @@ import pt.up.fe.qsfl.common.messaging.Service;
 import pt.up.fe.qsfl.common.spectrum.NodeRecorder;
 import pt.up.fe.qsfl.common.spectrum.ProbeRecorder;
 import pt.up.fe.qsfl.common.spectrum.TransactionRecorder;
+import pt.up.fe.qsfl.instrumenter.runtime.data.ValueProbeRecorder;
 
 public class InstrumentationRecorderService implements Service {
 
@@ -27,6 +28,7 @@ public class InstrumentationRecorderService implements Service {
 		listener.add(new NodeRecorder(path + "nodes.txt"));
 		listener.add(new ProbeRecorder(path + "probes.txt"));
 		listener.add(new TransactionRecorder(path + "transactions.txt"));
+		listener.add(new ValueProbeRecorder(path + "valueprobes.txt"));
 	}
 
 	public boolean isFinished() {
